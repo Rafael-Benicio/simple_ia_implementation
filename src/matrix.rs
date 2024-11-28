@@ -32,7 +32,7 @@ impl Matrix {
         self.map(|_| thread_rng().gen());
     }
 
-    fn map(&mut self, func: fn(f64) -> f64) {
+    pub fn map(&mut self, func: fn(f64) -> f64) {
         for row_i in self.data.iter_mut() {
             for col_i in row_i.iter_mut() {
                 *col_i = func(*col_i);
@@ -83,5 +83,15 @@ impl Matrix {
         }
 
         Ok(m_res)
+    }
+
+    pub fn vector_to_matrix(vector: Vec<f64>) -> Matrix {
+        let mut matrix_res = Matrix::zeros(vector.len(), 1);
+
+        for row in 0..matrix_res.rows {
+            matrix_res.data[row][0] = vector[row];
+        }
+
+        matrix_res
     }
 }
