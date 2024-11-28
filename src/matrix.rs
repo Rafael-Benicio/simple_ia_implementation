@@ -1,46 +1,26 @@
-use core::fmt::Formatter;
-use std::error::Error;
-use std::fmt::Display;
-
+use crate::matrix_err::MatrixErr;
 use rand::thread_rng;
 use rand::Rng;
 
 #[derive(Debug)]
-pub enum MatrixErr{
-    AddDiferentSizeMatrixs,
-}
-
-impl Error for MatrixErr{}
-
-impl Display for MatrixErr{
-    fn fmt(&self, _: &mut Formatter<'_>) -> Result<(), std::fmt::Error> { 
-        match *self {
-            MatrixErr::AddDiferentSizeMatrixs => Ok(()),
-        }
-    }
-}
-
 pub struct Matrix {
-    rows: i32,
-    cols: i32,
+    rows: usize,
+    cols: usize,
     data: Vec<Vec<f64>>,
 }
 
 impl Matrix {
-    pub fn new(rows: i32, cols: i32) -> Matrix {
-        let data: Vec<Vec<f64>> = vec![vec![0.0; cols as usize]; rows as usize];
-        let mut new_matrix = Matrix {
-            rows,
-            cols,
-            data: data,
-        };
+    pub fn new(rows: usize, cols: usize) -> Matrix {
+        let mut m_zeros = Matrix::zeros(rows, cols);
 
-        new_matrix.randomize();
-        new_matrix
+        m_zeros.randomize();
+
+        m_zeros
     }
 
-    pub fn zeros(rows: i32, cols: i32) -> Matrix {
+    pub fn zeros(rows: usize, cols: usize) -> Matrix {
         let data: Vec<Vec<f64>> = vec![vec![0.0; cols as usize]; rows as usize];
+
         Matrix {
             rows,
             cols,
@@ -49,9 +29,13 @@ impl Matrix {
     }
 
     fn randomize(&mut self) {
+        self.map(|_| thread_rng().gen());
+    }
+
+    fn map(&mut self, func: fn(f64) -> f64) {
         for row_i in self.data.iter_mut() {
             for col_i in row_i.iter_mut() {
-                *col_i = thread_rng().gen();
+                *col_i = func(*col_i);
             }
         }
     }
@@ -60,9 +44,9 @@ impl Matrix {
         print!("\n");
         for row_v in &self.data {
             for col_v in row_v {
-                print!("{} ", col_v);
+                print!("|{:.3} ", col_v);
             }
-            print!("\n");
+            print!("|\n");
         }
         print!("\n");
     }
@@ -81,5 +65,23 @@ impl Matrix {
         }
 
         Ok(matrix_res)
+    }
+
+    pub fn mult(m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
+        if m_a.cols != m_b.rows {
+            return Err(MatrixErr::ImcompatibleMultiplicationMatrixs);
+        }
+
+        let mut m_res = Matrix::zeros(m_a.rows, m_b.cols);
+
+        for a_r in 0..m_a.rows as usize {
+            for b_c in 0..m_b.cols as usize {
+                for ab in 0..m_b.rows as usize {
+                    m_res.data[a_r][b_c] += m_a.data[a_r][ab] * m_b.data[ab][b_c]
+                }
+            }
+        }
+
+        Ok(m_res)
     }
 }
