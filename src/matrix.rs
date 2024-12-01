@@ -2,12 +2,11 @@ use crate::matrix_err::MatrixErr;
 use rand::thread_rng;
 use rand::Rng;
 
-#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Matrix {
-    rows: usize,
-    cols: usize,
-    data: Vec<Vec<f64>>,
+    pub rows: usize,
+    pub cols: usize,
+    pub data: Vec<Vec<f64>>,
 }
 
 impl Matrix {
@@ -29,20 +28,33 @@ impl Matrix {
         }
     }
 
-    pub fn add(matrix_a: &Matrix, matrix_b: &Matrix) -> Result<Matrix, MatrixErr> {
-        if matrix_a.cols != matrix_b.cols || matrix_a.rows != matrix_b.rows {
+    pub fn add(m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
+        Matrix::even_operations(m_a, m_b, |a,b| {a+b})
+    }
+
+    pub fn hadamard (m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
+        Matrix::even_operations(m_a, m_b, |a,b| {a*b})
+    }
+
+    pub fn sub (m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
+        Matrix::even_operations(m_a, m_b, |a,b| {a-b})
+    }
+
+
+    pub fn even_operations(m_a: &Matrix, m_b: &Matrix, func : fn(f64,f64)-> f64) -> Result<Matrix, MatrixErr> {
+        if m_a.cols != m_b.cols || m_a.rows != m_b.rows {
             return Err(MatrixErr::AddDiferentSizeMatrixs);
         }
 
-        let mut matrix_res = Matrix::zeros(matrix_a.rows, matrix_a.cols);
+        let mut m_res = Matrix::zeros(m_a.rows, m_a.cols);
 
-        for r in 0..matrix_res.rows as usize {
-            for c in 0..matrix_res.cols as usize {
-                matrix_res.data[r][c] = matrix_a.data[r][c] + matrix_b.data[r][c]
+        for r in 0..m_res.rows as usize {
+            for c in 0..m_res.cols as usize {
+                m_res.data[r][c] = func(m_a.data[r][c], m_b.data[r][c])
             }
         }
 
-        Ok(matrix_res)
+        Ok(m_res)
     }
 
     pub fn mult(m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
@@ -93,6 +105,18 @@ impl Matrix {
         }
     }
 
+    pub fn transpose(&self) -> Matrix {
+        let mut m_res = Matrix::zeros(self.cols, self.rows);
+
+        for r in 0..self.rows {
+            for c in 0..self.cols {
+                m_res.data[c][r] = self.data[r][c]
+            }
+        }
+
+        m_res
+    }
+
     pub fn print(&self) {
         print!("\n");
         for row_v in &self.data {
@@ -104,3 +128,4 @@ impl Matrix {
         print!("\n");
     }
 }
+
