@@ -2,6 +2,7 @@ use crate::matrix_err::MatrixErr;
 use rand::thread_rng;
 use rand::Rng;
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Matrix {
     rows: usize,
@@ -26,29 +27,6 @@ impl Matrix {
             cols,
             data: data,
         }
-    }
-
-    fn randomize(&mut self) {
-        self.map(|_| thread_rng().gen());
-    }
-
-    pub fn map(&mut self, func: fn(f64) -> f64) {
-        for row_i in self.data.iter_mut() {
-            for col_i in row_i.iter_mut() {
-                *col_i = func(*col_i);
-            }
-        }
-    }
-
-    pub fn print(&self) {
-        print!("\n");
-        for row_v in &self.data {
-            for col_v in row_v {
-                print!("|{:.3} ", col_v);
-            }
-            print!("|\n");
-        }
-        print!("\n");
     }
 
     pub fn add(matrix_a: &Matrix, matrix_b: &Matrix) -> Result<Matrix, MatrixErr> {
@@ -93,5 +71,36 @@ impl Matrix {
         }
 
         matrix_res
+    }
+
+    fn randomize(&mut self) {
+        self.map(|_| thread_rng().gen());
+    }
+
+    pub fn scalar(&mut self, scalar: f64) {
+        for row_i in self.data.iter_mut() {
+            for col_i in row_i.iter_mut() {
+                *col_i = *col_i * scalar;
+            }
+        }
+    }
+
+    pub fn map(&mut self, func: fn(f64) -> f64) {
+        for row_i in self.data.iter_mut() {
+            for col_i in row_i.iter_mut() {
+                *col_i = func(*col_i);
+            }
+        }
+    }
+
+    pub fn print(&self) {
+        print!("\n");
+        for row_v in &self.data {
+            for col_v in row_v {
+                print!("|{:.3} ", col_v);
+            }
+            print!("|\n");
+        }
+        print!("\n");
     }
 }
