@@ -46,7 +46,7 @@ impl Matrix {
         func: fn(f64, f64) -> f64,
     ) -> Result<Matrix, MatrixErr> {
         if m_a.cols != m_b.cols || m_a.rows != m_b.rows {
-            return Err(MatrixErr::AddDiferentSizeMatrixs);
+            return Err(MatrixErr::DiferentSizeMatrixs);
         }
 
         let mut m_res = Matrix::zeros(m_a.rows, m_a.cols);
