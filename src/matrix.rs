@@ -29,19 +29,22 @@ impl Matrix {
     }
 
     pub fn add(m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
-        Matrix::even_operations(m_a, m_b, |a,b| {a+b})
+        Matrix::even_operations(m_a, m_b, |a, b| a + b)
     }
 
-    pub fn hadamard (m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
-        Matrix::even_operations(m_a, m_b, |a,b| {a*b})
+    pub fn sub(m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
+        Matrix::even_operations(m_a, m_b, |a, b| a - b)
     }
 
-    pub fn sub (m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
-        Matrix::even_operations(m_a, m_b, |a,b| {a-b})
+    pub fn hadamard(m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
+        Matrix::even_operations(m_a, m_b, |a, b| a * b)
     }
 
-
-    pub fn even_operations(m_a: &Matrix, m_b: &Matrix, func : fn(f64,f64)-> f64) -> Result<Matrix, MatrixErr> {
+    pub fn even_operations(
+        m_a: &Matrix,
+        m_b: &Matrix,
+        func: fn(f64, f64) -> f64,
+    ) -> Result<Matrix, MatrixErr> {
         if m_a.cols != m_b.cols || m_a.rows != m_b.rows {
             return Err(MatrixErr::AddDiferentSizeMatrixs);
         }
@@ -128,4 +131,3 @@ impl Matrix {
         print!("\n");
     }
 }
-
