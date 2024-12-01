@@ -1,5 +1,5 @@
 use crate::math_functions::MathFunctions;
-use crate::matrix::Matrix;
+use crate::Matrix;
 
 #[derive(Debug)]
 pub struct NeuralNetwork {

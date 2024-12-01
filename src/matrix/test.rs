@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::matrix::Matrix;
+    use crate::Matrix;
 
     #[test]
     fn zeros() {

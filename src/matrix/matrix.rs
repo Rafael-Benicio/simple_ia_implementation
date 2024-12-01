@@ -1,4 +1,4 @@
-use crate::matrix_err::MatrixErr;
+use crate::matrix::matrix_err::MatrixErr;
 use rand::thread_rng;
 use rand::Rng;
 
