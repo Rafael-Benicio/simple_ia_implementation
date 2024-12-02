@@ -1,8 +1,8 @@
-use crate::matrix::matrix_err::MatrixErr;
+use rand::seq::index;
 use rand::thread_rng;
 use rand::Rng;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Matrix {
     pub rows: usize,
     pub cols: usize,
@@ -28,25 +28,21 @@ impl Matrix {
         }
     }
 
-    pub fn add(m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
+    pub fn add(m_a: &Matrix, m_b: &Matrix) -> Matrix {
         Matrix::even_operations(m_a, m_b, |a, b| a + b)
     }
 
-    pub fn sub(m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
+    pub fn sub(m_a: &Matrix, m_b: &Matrix) -> Matrix {
         Matrix::even_operations(m_a, m_b, |a, b| a - b)
     }
 
-    pub fn hadamard(m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
+    pub fn hadamard(m_a: &Matrix, m_b: &Matrix) -> Matrix {
         Matrix::even_operations(m_a, m_b, |a, b| a * b)
     }
 
-    pub fn even_operations(
-        m_a: &Matrix,
-        m_b: &Matrix,
-        func: fn(f64, f64) -> f64,
-    ) -> Result<Matrix, MatrixErr> {
+    pub fn even_operations(m_a: &Matrix, m_b: &Matrix, func: fn(f64, f64) -> f64) -> Matrix {
         if m_a.cols != m_b.cols || m_a.rows != m_b.rows {
-            return Err(MatrixErr::DiferentSizeMatrixs);
+            panic!("Error in same size Matrix operation")
         }
 
         let mut m_res = Matrix::zeros(m_a.rows, m_a.cols);
@@ -57,12 +53,12 @@ impl Matrix {
             }
         }
 
-        Ok(m_res)
+        m_res
     }
 
-    pub fn mult(m_a: &Matrix, m_b: &Matrix) -> Result<Matrix, MatrixErr> {
+    pub fn mult(m_a: &Matrix, m_b: &Matrix) -> Matrix {
         if m_a.cols != m_b.rows {
-            return Err(MatrixErr::ImcompatibleMultiplicationMatrixs);
+            panic!("Multiplication with matrix of incompatibles sizes")
         }
 
         let mut m_res = Matrix::zeros(m_a.rows, m_b.cols);
@@ -75,7 +71,7 @@ impl Matrix {
             }
         }
 
-        Ok(m_res)
+        m_res
     }
 
     pub fn vector_to_matrix(vector: Vec<f64>) -> Matrix {
@@ -86,6 +82,19 @@ impl Matrix {
         }
 
         matrix_res
+    }
+
+    pub fn matrix_to_vector(matrix: Matrix) -> Vec<f64> {
+        let mut vec = vec![0.0; matrix.rows * matrix.cols];
+
+        for row in 0..matrix.rows {
+            for col in 0..matrix.cols {
+                let index = matrix.rows * row + col;
+                vec[index] = matrix.data[row][col];
+            }
+        }
+
+        vec
     }
 
     fn randomize(&mut self) {

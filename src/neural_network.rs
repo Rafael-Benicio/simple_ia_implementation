@@ -10,6 +10,7 @@ pub struct NeuralNetwork {
     bias_ho: Matrix,
     weight_ih: Matrix,
     weight_oh: Matrix,
+    learning_rate: f64,
 }
 
 impl NeuralNetwork {
@@ -22,23 +23,71 @@ impl NeuralNetwork {
             bias_ho: Matrix::new(o_size, 1),
             weight_ih: Matrix::new(h_size, i_size),
             weight_oh: Matrix::new(o_size, h_size),
+            learning_rate: 1.0,
         }
     }
 
-    pub fn feedforward(&self, input: Vec<f64>) -> Matrix {
+    pub fn train(&mut self, input: Vec<f64>, target: Vec<f64>) {
         let input = Matrix::vector_to_matrix(input);
-        let mut hidden =
-            Matrix::mult(&self.weight_ih, &input).expect("Erro in weight * input process");
-        hidden = Matrix::add(&hidden, &self.bias_ih).expect("Erro in hidden + bias process");
+        let mut hidden = Matrix::mult(&self.weight_ih, &input);
+        hidden = Matrix::add(&hidden, &self.bias_ih);
 
         hidden.map(MathFunctions::sigmoid);
 
-        let mut output =
-            Matrix::mult(&self.weight_oh, &hidden).expect("Erro in hidden * weight process");
-        output = Matrix::add(&output, &self.bias_ho).expect("Erro in output + bias process");
+        let mut output = Matrix::mult(&self.weight_oh, &hidden);
+        output = Matrix::add(&output, &self.bias_ho);
 
         output.map(MathFunctions::sigmoid);
 
-        output
+        // back propagation
+
+        let expected = Matrix::vector_to_matrix(target);
+
+        let o_error = Matrix::sub(&expected, &output);
+        let mut d_output = output.clone();
+
+        d_output.map(MathFunctions::d_sigmoid);
+
+        let hidden_t = Matrix::transpose(&hidden);
+        let mut gradient = Matrix::hadamard(&o_error, &d_output);
+
+        gradient.scalar(self.learning_rate);
+
+        let w_ho_deltas = Matrix::mult(&gradient, &hidden_t);
+
+        self.weight_oh = Matrix::add(&self.weight_oh, &w_ho_deltas);
+
+        // =======================
+
+        let w_oh_t = self.weight_oh.transpose();
+
+        let hidden_error = Matrix::mult(&w_oh_t, &o_error);
+        let mut d_hidden = hidden.clone();
+
+        d_hidden.map(MathFunctions::d_sigmoid);
+
+        let input_t = input.transpose();
+
+        let mut gradient_h = Matrix::hadamard(&hidden_error, &d_hidden);
+        gradient_h.scalar(self.learning_rate);
+
+        let w_ih_deltas = Matrix::mult(&gradient_h, &input_t);
+
+        self.weight_ih = Matrix::add(&self.weight_ih, &w_ih_deltas);
+    }
+
+    pub fn predict(&self, input: Vec<f64>) -> Vec<f64> {
+        let input = Matrix::vector_to_matrix(input);
+        let mut hidden = Matrix::mult(&self.weight_ih, &input);
+        hidden = Matrix::add(&hidden, &self.bias_ih);
+
+        hidden.map(MathFunctions::sigmoid);
+
+        let mut output = Matrix::mult(&self.weight_oh, &hidden);
+        output = Matrix::add(&output, &self.bias_ho);
+
+        output.map(MathFunctions::sigmoid);
+
+        Matrix::matrix_to_vector(output)
     }
 }

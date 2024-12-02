@@ -45,14 +45,13 @@ mod tests {
         m_2.map(|_| 2.0);
         m_3.map(|_| 3.0);
 
-        let m_res = Matrix::even_operations(&Matrix::add(&m_1, &m_2).unwrap(), &m_3, |a, b| {
+        let m_res = Matrix::even_operations(&Matrix::add(&m_1, &m_2), &m_3, |a, b| {
             if a == b {
                 1.0
             } else {
                 0.0
             }
-        })
-        .unwrap();
+        });
 
         for m in m_res.data {
             assert_eq!(m.contains(&0.0), false)
@@ -68,14 +67,13 @@ mod tests {
         m_2.map(|_| 2.0);
         m_3.map(|_| 3.0);
 
-        let m_res = Matrix::even_operations(&Matrix::sub(&m_1, &m_2).unwrap(), &m_3, |a, b| {
+        let m_res = Matrix::even_operations(&Matrix::sub(&m_1, &m_2), &m_3, |a, b| {
             if a == b {
                 1.0
             } else {
                 0.0
             }
-        })
-        .unwrap();
+        });
 
         for m in m_res.data {
             assert_eq!(m.contains(&0.0), false)
@@ -91,15 +89,13 @@ mod tests {
         m_2.map(|_| 2.0);
         m_3.map(|_| 2.0);
 
-        let m_res =
-            Matrix::even_operations(&Matrix::hadamard(&m_1, &m_2).unwrap(), &m_3, |a, b| {
-                if a == b {
-                    1.0
-                } else {
-                    0.0
-                }
-            })
-            .unwrap();
+        let m_res = Matrix::even_operations(&Matrix::hadamard(&m_1, &m_2), &m_3, |a, b| {
+            if a == b {
+                1.0
+            } else {
+                0.0
+            }
+        });
 
         for m in m_res.data {
             assert_eq!(m.contains(&0.0), false)
