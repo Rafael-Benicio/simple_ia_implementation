@@ -1,4 +1,3 @@
-use rand::seq::index;
 use rand::thread_rng;
 use rand::Rng;
 
@@ -19,6 +18,10 @@ impl Matrix {
     }
 
     pub fn zeros(rows: usize, cols: usize) -> Matrix {
+        if rows == 0 || cols == 0 {
+            panic!("Row or column number is 0");
+        }
+
         let data: Vec<Vec<f64>> = vec![vec![0.0; cols as usize]; rows as usize];
 
         Matrix {
@@ -74,7 +77,7 @@ impl Matrix {
         m_res
     }
 
-    pub fn vector_to_matrix(vector: Vec<f64>) -> Matrix {
+    pub fn vector_to_matrix(vector: &Vec<f64>) -> Matrix {
         let mut matrix_res = Matrix::zeros(vector.len(), 1);
 
         for row in 0..matrix_res.rows {
@@ -84,13 +87,14 @@ impl Matrix {
         matrix_res
     }
 
-    pub fn matrix_to_vector(matrix: Matrix) -> Vec<f64> {
+    pub fn matrix_to_vector(matrix: &Matrix) -> Vec<f64> {
         let mut vec = vec![0.0; matrix.rows * matrix.cols];
+        let mut index = 0;
 
         for row in 0..matrix.rows {
             for col in 0..matrix.cols {
-                let index = matrix.rows * row + col;
                 vec[index] = matrix.data[row][col];
+                index += 1;
             }
         }
 

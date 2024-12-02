@@ -28,7 +28,7 @@ impl NeuralNetwork {
     }
 
     pub fn train(&mut self, input: Vec<f64>, target: Vec<f64>) {
-        let input = Matrix::vector_to_matrix(input);
+        let input = Matrix::vector_to_matrix(&input);
         let mut hidden = Matrix::mult(&self.weight_ih, &input);
         hidden = Matrix::add(&hidden, &self.bias_ih);
 
@@ -41,7 +41,7 @@ impl NeuralNetwork {
 
         // back propagation
 
-        let expected = Matrix::vector_to_matrix(target);
+        let expected = Matrix::vector_to_matrix(&target);
 
         let o_error = Matrix::sub(&expected, &output);
         let mut d_output = output.clone();
@@ -77,7 +77,7 @@ impl NeuralNetwork {
     }
 
     pub fn predict(&self, input: Vec<f64>) -> Vec<f64> {
-        let input = Matrix::vector_to_matrix(input);
+        let input = Matrix::vector_to_matrix(&input);
         let mut hidden = Matrix::mult(&self.weight_ih, &input);
         hidden = Matrix::add(&hidden, &self.bias_ih);
 
@@ -88,6 +88,6 @@ impl NeuralNetwork {
 
         output.map(MathFunctions::sigmoid);
 
-        Matrix::matrix_to_vector(output)
+        Matrix::matrix_to_vector(&output)
     }
 }
