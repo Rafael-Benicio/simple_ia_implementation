@@ -6,10 +6,8 @@ pub struct NeuralNetwork {
     i_nodes: usize,
     h_nodes: usize,
     o_nodes: usize,
-    bias_ih: Matrix<f64>,
-    bias_ho: Matrix<f64>,
-    weight_ih: Matrix<f64>,
-    weight_oh: Matrix<f64>,
+    bias: Vec<Matrix<f64>>,
+    weights : Vec<Matrix<f64>>,
     learning_rate: f64,
 }
 
@@ -19,74 +17,64 @@ impl NeuralNetwork {
             i_nodes: i_size,
             h_nodes: h_size,
             o_nodes: o_size,
-            bias_ih: Matrix::new(h_size, 1),
-            bias_ho: Matrix::new(o_size, 1),
-            weight_ih: Matrix::new(h_size, i_size),
-            weight_oh: Matrix::new(o_size, h_size),
+            bias: vec![Matrix::new(h_size, 1),Matrix::new(o_size, 1)],
+            weights: vec![Matrix::new(h_size, i_size),Matrix::new(o_size, h_size)],
             learning_rate: 1.0,
         }
     }
 
     pub fn train(&mut self, input: Vec<f64>, target: Vec<f64>) {
         let input = Matrix::vector_to_matrix(&input);
-        let mut hidden = Matrix::mult(&self.weight_ih, &input);
-        hidden = Matrix::add(&hidden, &self.bias_ih);
-
-        hidden.map(MathFunctions::sigmoid);
-
-        let mut output = Matrix::mult(&self.weight_oh, &hidden);
-        output = Matrix::add(&output, &self.bias_ho);
-
-        output.map(MathFunctions::sigmoid);
-
-        // back propagation
-
         let expected = Matrix::vector_to_matrix(&target);
 
-        let o_error = Matrix::sub(&expected, &output);
-        let mut d_output = output.clone();
+        // Feedforwad
 
-        d_output.map(MathFunctions::d_sigmoid);
+        let mut hidden = self.node_layer(&input,0);
+        let mut output = self.node_layer(&hidden,1);
 
+        // Backpropagation
+
+        let error_b = Matrix::sub(&expected, &output);
         let hidden_t = Matrix::transpose(&hidden);
-        let mut gradient = Matrix::hadamard(&o_error, &d_output);
 
-        gradient.scalar(self.learning_rate);
+        output.map(MathFunctions::d_sigmoid);
 
-        let w_ho_deltas = Matrix::mult(&gradient, &hidden_t);
+        let mut gradient_b = Matrix::hadamard(&error_b, &output);
+        gradient_b.scalar(self.learning_rate);
 
-        self.weight_oh = Matrix::add(&self.weight_oh, &w_ho_deltas);
+        let weight_deltas = Matrix::mult(&gradient_b, &hidden_t);
+
+        self.weights[1] = Matrix::add(&self.weights[1], &weight_deltas);
 
         // =======================
 
-        let w_oh_t = self.weight_oh.transpose();
+        let weight_t = self.weights[1].transpose();
 
-        let hidden_error = Matrix::mult(&w_oh_t, &o_error);
-        let mut d_hidden = hidden.clone();
-
-        d_hidden.map(MathFunctions::d_sigmoid);
-
+        let error_a = Matrix::mult(&weight_t, &error_b);
         let input_t = input.transpose();
 
-        let mut gradient_h = Matrix::hadamard(&hidden_error, &d_hidden);
-        gradient_h.scalar(self.learning_rate);
+        hidden.map(MathFunctions::d_sigmoid);
 
-        let w_ih_deltas = Matrix::mult(&gradient_h, &input_t);
+        let mut gradient_a = Matrix::hadamard(&error_a, &hidden);
+        gradient_a.scalar(self.learning_rate);
 
-        self.weight_ih = Matrix::add(&self.weight_ih, &w_ih_deltas);
+        let weight_deltas = Matrix::mult(&gradient_a, &input_t);
+
+        self.weights[0] = Matrix::add(&self.weights[0], &weight_deltas);
+    }
+
+    fn node_layer(&self, layer: &Matrix<f64>,layer_index : usize) -> Matrix<f64> {
+        let mut output = Matrix::mult(&self.weights[layer_index], &layer);
+        output = Matrix::add(&output, &self.bias[layer_index]);
+        output.map(MathFunctions::sigmoid);
+        output
     }
 
     pub fn predict(&self, input: Vec<f64>) -> Vec<f64> {
         let input = Matrix::vector_to_matrix(&input);
-        let mut hidden = Matrix::mult(&self.weight_ih, &input);
-        hidden = Matrix::add(&hidden, &self.bias_ih);
 
-        hidden.map(MathFunctions::sigmoid);
-
-        let mut output = Matrix::mult(&self.weight_oh, &hidden);
-        output = Matrix::add(&output, &self.bias_ho);
-
-        output.map(MathFunctions::sigmoid);
+        let hidden = self.node_layer(&input,0);
+        let output = self.node_layer(&hidden,1);
 
         Matrix::matrix_to_vector(&output)
     }
