@@ -6,10 +6,10 @@ pub struct NeuralNetwork {
     i_nodes: usize,
     h_nodes: usize,
     o_nodes: usize,
-    bias_ih: Matrix,
-    bias_ho: Matrix,
-    weight_ih: Matrix,
-    weight_oh: Matrix,
+    bias_ih: Matrix<f64>,
+    bias_ho: Matrix<f64>,
+    weight_ih: Matrix<f64>,
+    weight_oh: Matrix<f64>,
     learning_rate: f64,
 }
 
