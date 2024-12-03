@@ -1,15 +1,32 @@
-use rand::thread_rng;
-use rand::Rng;
+use std::default::Default;
+use std::fmt::{Debug, Display};
+use std::ops::{Add, AddAssign, Mul, Sub};
+
+use rand::distributions::Standard;
+use rand::prelude::Distribution;
+use rand::{thread_rng, Rng};
 
 #[derive(Debug, Clone)]
-pub struct Matrix {
+pub struct Matrix<T> {
     pub rows: usize,
     pub cols: usize,
-    pub data: Vec<Vec<f64>>,
+    pub data: Vec<Vec<T>>,
 }
 
-impl Matrix {
-    pub fn new(rows: usize, cols: usize) -> Matrix {
+#[allow(dead_code)]
+impl<T> Matrix<T>
+where
+    T: Debug
+        + Copy
+        + Add<Output = T>
+        + Sub<Output = T>
+        + Mul<Output = T>
+        + AddAssign
+        + Default
+        + Display,
+    Standard: Distribution<T>,
+{
+    pub fn new(rows: usize, cols: usize) -> Matrix<T> {
         let mut m_zeros = Matrix::zeros(rows, cols);
 
         m_zeros.randomize();
@@ -17,12 +34,12 @@ impl Matrix {
         m_zeros
     }
 
-    pub fn zeros(rows: usize, cols: usize) -> Matrix {
+    pub fn zeros(rows: usize, cols: usize) -> Matrix<T> {
         if rows == 0 || cols == 0 {
             panic!("Row or column number is 0");
         }
 
-        let data: Vec<Vec<f64>> = vec![vec![0.0; cols as usize]; rows as usize];
+        let data: Vec<Vec<T>> = vec![vec![Default::default(); cols as usize]; rows as usize];
 
         Matrix {
             rows,
@@ -31,19 +48,19 @@ impl Matrix {
         }
     }
 
-    pub fn add(m_a: &Matrix, m_b: &Matrix) -> Matrix {
+    pub fn add(m_a: &Matrix<T>, m_b: &Matrix<T>) -> Matrix<T> {
         Matrix::even_operations(m_a, m_b, |a, b| a + b)
     }
 
-    pub fn sub(m_a: &Matrix, m_b: &Matrix) -> Matrix {
+    pub fn sub(m_a: &Matrix<T>, m_b: &Matrix<T>) -> Matrix<T> {
         Matrix::even_operations(m_a, m_b, |a, b| a - b)
     }
 
-    pub fn hadamard(m_a: &Matrix, m_b: &Matrix) -> Matrix {
+    pub fn hadamard(m_a: &Matrix<T>, m_b: &Matrix<T>) -> Matrix<T> {
         Matrix::even_operations(m_a, m_b, |a, b| a * b)
     }
 
-    pub fn even_operations(m_a: &Matrix, m_b: &Matrix, func: fn(f64, f64) -> f64) -> Matrix {
+    pub fn even_operations(m_a: &Matrix<T>, m_b: &Matrix<T>, func: fn(T, T) -> T) -> Matrix<T> {
         if m_a.cols != m_b.cols || m_a.rows != m_b.rows {
             panic!("Error in same size Matrix operation")
         }
@@ -59,7 +76,7 @@ impl Matrix {
         m_res
     }
 
-    pub fn mult(m_a: &Matrix, m_b: &Matrix) -> Matrix {
+    pub fn mult(m_a: &Matrix<T>, m_b: &Matrix<T>) -> Matrix<T> {
         if m_a.cols != m_b.rows {
             panic!("Multiplication with matrix of incompatibles sizes")
         }
@@ -77,7 +94,7 @@ impl Matrix {
         m_res
     }
 
-    pub fn vector_to_matrix(vector: &Vec<f64>) -> Matrix {
+    pub fn vector_to_matrix(vector: &Vec<T>) -> Matrix<T> {
         let mut matrix_res = Matrix::zeros(vector.len(), 1);
 
         for row in 0..matrix_res.rows {
@@ -87,8 +104,8 @@ impl Matrix {
         matrix_res
     }
 
-    pub fn matrix_to_vector(matrix: &Matrix) -> Vec<f64> {
-        let mut vec = vec![0.0; matrix.rows * matrix.cols];
+    pub fn matrix_to_vector(matrix: &Matrix<T>) -> Vec<T> {
+        let mut vec = vec![Default::default(); matrix.rows * matrix.cols];
         let mut index = 0;
 
         for row in 0..matrix.rows {
@@ -105,7 +122,7 @@ impl Matrix {
         self.map(|_| thread_rng().gen());
     }
 
-    pub fn scalar(&mut self, scalar: f64) {
+    pub fn scalar(&mut self, scalar: T) {
         for row_i in self.data.iter_mut() {
             for col_i in row_i.iter_mut() {
                 *col_i = *col_i * scalar;
@@ -113,7 +130,7 @@ impl Matrix {
         }
     }
 
-    pub fn map(&mut self, func: fn(f64) -> f64) {
+    pub fn map(&mut self, func: fn(T) -> T) {
         for row_i in self.data.iter_mut() {
             for col_i in row_i.iter_mut() {
                 *col_i = func(*col_i);
@@ -121,7 +138,7 @@ impl Matrix {
         }
     }
 
-    pub fn transpose(&self) -> Matrix {
+    pub fn transpose(&self) -> Matrix<T> {
         let mut m_res = Matrix::zeros(self.cols, self.rows);
 
         for r in 0..self.rows {
@@ -137,7 +154,7 @@ impl Matrix {
         print!("\n");
         for row_v in &self.data {
             for col_v in row_v {
-                print!("|{:.3} ", col_v);
+                print!("|{} ", col_v);
             }
             print!("|\n");
         }

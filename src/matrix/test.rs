@@ -5,19 +5,19 @@ mod tests {
     #[test]
     #[should_panic]
     fn zeros_panic_1() {
-        Matrix::zeros(1, 0);
+        Matrix::<f64>::zeros(1, 0);
     }
 
     #[test]
     #[should_panic]
     fn zeros_panic_2() {
-        Matrix::zeros(0, 1);
+        Matrix::<f64>::zeros(0, 1);
     }
 
     #[test]
     #[should_panic]
     fn zeros_panic_3() {
-        Matrix::zeros(0, 0);
+        Matrix::<f64>::zeros(0, 0);
     }
 
     #[test]
@@ -27,7 +27,7 @@ mod tests {
         let m_3 = Matrix::zeros(3, 1);
         let m_4 = Matrix::zeros(3, 5);
 
-        let full_zeros = |m: Matrix| -> bool {
+        let full_zeros = |m: Matrix<f64>| -> bool {
             for m_i in m.data {
                 for m_j in m_i {
                     if m_j != 0.0 {
@@ -122,7 +122,7 @@ mod tests {
 
     #[test]
     fn mult() {
-        let m_1 = Matrix::zeros(2, 3);
+        let m_1: Matrix<f64> = Matrix::zeros(2, 3);
         let m_2 = Matrix::zeros(3, 2);
 
         let m_res = Matrix::mult(&m_1, &m_2);
@@ -134,7 +134,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn mult_panic() {
-        let m_1 = Matrix::zeros(2, 2);
+        let m_1: Matrix<f64> = Matrix::zeros(2, 2);
         let m_2 = Matrix::zeros(3, 2);
 
         let m_res = Matrix::mult(&m_1, &m_2);
@@ -149,28 +149,28 @@ mod tests {
         let mut m_1 = Matrix::zeros(2, 2);
         let mut m_2 = Matrix::zeros(2, 1);
         let mut m_3 = Matrix::zeros(2, 2);
-        m_1.map(|_| 1.0);
-        m_2.map(|_| 2.0);
-        m_3.map(|_| 2.0);
+        m_1.map(|_| 1);
+        m_2.map(|_| 2);
+        m_3.map(|_| 2);
 
         let m_res = Matrix::even_operations(&Matrix::hadamard(&m_1, &m_2), &m_3, |a, b| {
             if a == b {
-                1.0
+                1
             } else {
-                0.0
+                0
             }
         });
 
         for m in m_res.data {
-            assert_eq!(m.contains(&0.0), false)
+            assert_eq!(m.contains(&0), false)
         }
     }
 
     #[test]
     fn vector_to_matrix() {
-        let test_v = vec![1.0, 2.0, 4.0];
+        let test_v = vec![1, 2, 4];
 
-        let m_test_v = Matrix::vector_to_matrix(&test_v);
+        let m_test_v: Matrix<u8> = Matrix::vector_to_matrix(&test_v);
 
         assert_eq!(m_test_v.cols, 1);
         assert_eq!(m_test_v.rows, test_v.len());
@@ -178,9 +178,9 @@ mod tests {
 
     #[test]
     fn matrix_to_vector() {
-        let test_vec_1 = Matrix::matrix_to_vector(&Matrix::zeros(4, 4));
-        let test_vec_2 = Matrix::matrix_to_vector(&Matrix::zeros(4, 2));
-        let test_vec_3 = Matrix::matrix_to_vector(&Matrix::zeros(2, 6));
+        let test_vec_1: Vec<f64> = Matrix::matrix_to_vector(&Matrix::zeros(4, 4));
+        let test_vec_2: Vec<f64> = Matrix::matrix_to_vector(&Matrix::zeros(4, 2));
+        let test_vec_3: Vec<f64> = Matrix::matrix_to_vector(&Matrix::zeros(2, 6));
 
         assert_eq!(test_vec_1.len(), 16);
         assert_eq!(test_vec_2.len(), 8);
@@ -189,7 +189,7 @@ mod tests {
 
     #[test]
     fn map() {
-        let mut m_1 = Matrix::zeros(2, 5);
+        let mut m_1: Matrix<f64> = Matrix::zeros(2, 5);
 
         m_1.map(|_| 2.0);
 
@@ -202,7 +202,7 @@ mod tests {
 
     #[test]
     fn transpose() {
-        let m_1 = Matrix::zeros(3, 2);
+        let m_1: Matrix<i8> = Matrix::zeros(3, 2);
 
         let m_1 = m_1.transpose();
 
@@ -212,7 +212,7 @@ mod tests {
 
     #[test]
     fn scalar() {
-        let mut m_1 = Matrix::zeros(3, 4);
+        let mut m_1: Matrix<f64> = Matrix::zeros(3, 4);
 
         m_1.map(|_| 1.0);
 
